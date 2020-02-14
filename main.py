@@ -1,6 +1,6 @@
 from flask import Flask
 import sqlite3
-conn = sqlite3.connect('hackers.db')
+conn = sqlite3.connect('/database/htn2020.db')
 
 app = Flask(__name__)
 
