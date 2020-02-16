@@ -5,10 +5,6 @@ from queries import *
 conn = sqlite3.connect('htn2020.db')
 c = conn.cursor()
 
-# DATA_URL = 'https://drive.google.com/file/d/1Pk-8vTaDLVqK1Anx7wa7eU4Gaz1YJJra/view'
-
-# data = requests.get(url = DATA_URL).json()
-
 with open('data.json') as json_file:
     data = json.load(json_file)
     #populate the db from the given data
