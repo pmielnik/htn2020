@@ -66,9 +66,12 @@ SELECT_ALL_USER_INFO = '''
   GROUP BY user.id;
 '''
 
+SELECT_ALL_USER_INFO_COLS = ['id', 'name', 'phone', 'picture', 'company_name',
+                             'latitude', 'longitude', 'attended_events']
+
 SELECT_SINGLE_USER_INFO = '''
-    SELECT user.id, user.name, user.phone, user.picture, comp.name, loc.latitude,
-           loc.longitude, GROUP_CONCAT(events.name)
+    SELECT user.id, user.name, user.phone, user.picture, comp.name as company_name, loc.latitude,
+           loc.longitude, GROUP_CONCAT(events.name) as attended_events
       FROM users as user
       JOIN locations as loc
         ON user.location_id = loc.id
@@ -82,6 +85,9 @@ SELECT_SINGLE_USER_INFO = '''
   GROUP BY user.id;
 '''
 
+SELECT_SINGLE_USER_INFO_COLS = ['id', 'name', 'phone', 'picture', 'company_name',
+                                'latitude', 'longitude', 'attended_events']
+
 SELECT_ATTENDANCE_BY_USER = '''
     SELECT event_id FROM event_attendance
      WHERE user_id = ?;
@@ -93,20 +99,34 @@ SELECT_ATTENDANCE_BY_EVENT = '''
 '''
 
 # Takes in a latiutde, longitude, and range
-# order: lat, range, lat, range, long, range, long, range
+# order: lat min, lat max, long min, long max
 SELECT_USERS_BY_LOCATION_RANGE = '''
     SELECT users.id, users.name
       FROM users
       JOIN locations as loc
         ON users.location_id = loc.id
-     WHERE loc.lat >= (? - ?)
-       AND loc.lat <= (? - ?)
-       AND loc.long >= (? - ?)
-       AND loc.long <= (? + ?);
+     WHERE loc.latitude >= ?
+       AND loc.latitude <= ?
+       AND loc.longitude >= ?
+       AND loc.longitude <= ?;
 '''
 
+SELECT_USERS_BY_LOCATION_RANGE_COLS = ['id', 'name']
+
+SELECT_ALL_EVENT_INFO = '''
+    SELECT events.id, events.name, GROUP_CONCAT(users.id) as user_ids
+      FROM events
+      JOIN event_attendance as ea
+        ON events.id = ea.event_id
+      JOIN users
+        ON ea.user_id = users.id
+  GROUP BY events.id;
+'''
+
+SELECT_ALL_EVENT_INFO_COLS = ['id', 'name', 'user_ids']
+
 SELECT_EVENT_INFO_BY_ID = '''
-    SELECT events.id, events.name, GROUP_CONCAT(users.id)
+    SELECT events.id, events.name, GROUP_CONCAT(users.id) as user_ids
       FROM events
       JOIN event_attendance as ea
         ON events.id = ea.event_id
@@ -115,3 +135,5 @@ SELECT_EVENT_INFO_BY_ID = '''
      WHERE events.id = ?
   GROUP BY events.id;
 '''
+
+SELECT_EVENT_INFO_BY_ID_COLS = ['id', 'name', 'user_ids']
