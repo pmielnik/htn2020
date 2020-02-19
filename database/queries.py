@@ -29,6 +29,11 @@ SELECT_EVENT_BY_NAME_SQL = '''
      WHERE name = ?;
 '''
 
+SELECT_EVENT_BY_ID_CHECK = '''
+    SELECT id FROM events
+     WHERE id = ?;
+'''
+
 SELECT_COMPANY_BY_NAME_SQL = '''
     SELECT id FROM companies
      WHERE name = ?;
@@ -49,6 +54,11 @@ SELECT_ATTENDANCE = '''
 SELECT_USER_BY_EMAIL = '''
     SELECT id FROM users
      WHERE email = ?;
+'''
+
+SELECT_USER_BY_ID_CHECK = '''
+    SELECT id FROM users
+     WHERE id = ?
 '''
 
 SELECT_ALL_USER_INFO = '''

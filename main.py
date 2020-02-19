@@ -10,18 +10,26 @@ app = Flask(__name__)
 
 #TODO: add to docs that you need to run "export FLASK_APP=main" and then run "flask run" to run the app
 
-#TODO: fix GROUP_BY fields to at least be an array and not simply a list of strs
-
 #TODO: fix db lol
 
 # formats the result, which is a list fo sqlite3.Row objects, into a
 # JSON object with the specified cols as keys
-def json_format(result, cols, type_name=None):
+def json_format(result, cols, type_name=None, group_concat=None):
     data = []
     for row in result:
-        if row != None && type_name != None:
+        if row != None and type_name != None and group_concat != None:
+            # change field from list of strings to array of ids
+            # each instance of cols in queries.py is defined as having the list od strs as the last element
+            single_data = dict(zip(cols, row))
+            list_obj = single_data[group_concat].split(',')
+            if(group_concat == 'user_id'):
+                single_data[group_concat] = [int(v) for v in list_obj]
+            else:
+                single_data[group_concat] = list_obj
+            data.append({type_name : single_data})
+        if row != None and type_name != None:
             data.append({type_name : dict(zip(cols, row))})
-        if row != None && type_name == None:
+        if row != None and type_name == None:
             data.append(dict(zip(cols, row)))
     
     return jsonify(data)
@@ -40,15 +48,15 @@ def users():
     c.execute(SELECT_ALL_USER_INFO)
     result = c.fetchall()
 
-    return json_format(result, SELECT_ALL_USER_INFO_COLS, 'user')
+    return json_format(result, SELECT_ALL_USER_INFO_COLS, 'user', 'attended_events')
 
 @app.route('/users/<user_id>')
 def user_info(user_id):
     #reutrn json payload of single user
-    c.execute(SELECT_SINGLE_USER_INFO, user_id)
+    c.execute(SELECT_SINGLE_USER_INFO, [user_id])
     result = c.fetchone()
 
-    return json_format([result], SELECT_SINGLE_USER_INFO_COLS, 'user')
+    return json_format([result], SELECT_SINGLE_USER_INFO_COLS, 'user', 'attended_events')
 
 @app.route('/location', methods=['GET'])
 def location_info():
@@ -72,31 +80,56 @@ def events():
     c.execute(SELECT_ALL_EVENT_INFO)
     result = c.fetchall()
 
-    return json_format(result, SELECT_ALL_EVENT_INFO_COLS, 'event')
+    return json_format(result, SELECT_ALL_EVENT_INFO_COLS, 'event', 'user_ids')
 
 @app.route('/events/<event_id>')
 def event_info(event_id):
+    print(event_id)
     #return json obj with event info + attendees
-    c.execute(SELECT_EVENT_INFO_BY_ID, event_id)
+    c.execute(SELECT_EVENT_INFO_BY_ID, [event_id])
     result = c.fetchone()
-    #TODO: add full attendee user objects instead of just IDs
-
-    return json_format([result], SELECT_EVENT_INFO_BY_ID_COLS)
+    #add full attendee user objects to replace user ids returned in query
+    if result != None:
+        data = dict(zip(SELECT_EVENT_INFO_BY_ID_COLS, result))
+        data['attendees'] = []
+        users = data['user_ids'].split(',')
+        for user_id in users:
+            c.execute(SELECT_SINGLE_USER_INFO, [user_id])
+            result = c.fetchone()
+            data['attendees'].append(dict(zip(SELECT_SINGLE_USER_INFO_COLS, result)))
+        
+        #remove unnecessary field
+        del data['user_ids']
+        return jsonify(data)
+    
+    return 'ERROR: event {0} does not exist'.format(event_id)
 
 @app.route('/events/<event_id>/attendees', methods=['GET', 'POST'])
 def event_attendeed(event_id):
     if request.method == 'GET':
         #simply return list of attendees
-        c.execute(SELECT_ATTENDANCE_BY_EVENT, event_id)
+        c.execute(SELECT_ATTENDANCE_BY_EVENT, [event_id])
         result = c.fetchone()
 
         return json_format([result], SELECT_ATTENDANCE_BY_EVENT_COLS, 'attendee')
     if request.method == 'POST':
         #register an attendee at the event, then return list of attendees
-        # TODO: make sure user_id actually exists first (or throw appropriate error code)
         user_id = request.args.get('user_id')
+
+        #ensure both user id and event id exist
+        c.exectue(SELECT_USER_BY_ID_CHECK, [user_id])
+        result = c.fetchone()
+        if result == None:
+            #TODO: throw error
+            return 'ERROR: no user with id {0}'.format(user_id)
+        c.execute(SELECT_EVENT_BY_ID_CHECK, [event_id])
+        result = c.fetchone()
+        if result == None:
+            #TODO: throw error
+            return 'ERROR: no event with id {0}'.format(event_id)
+
         c.execute(MARK_ATTENDANCE_SQL, [event_id, user_id])
         conn.commit()
         
         #if not crashed:
-        return format('success: registered user {0} for event {1}', user_id, event_id)
+        return 'success: registered user {0} for event {1}'.format(user_id, event_id)
