@@ -22,17 +22,34 @@ def json_format(result, cols, type_name=None, group_concat=None):
             # each instance of cols in queries.py is defined as having the list od strs as the last element
             single_data = dict(zip(cols, row))
             list_obj = single_data[group_concat].split(',')
-            if(group_concat == 'user_id'):
+            if(group_concat == 'user_ids'):
                 single_data[group_concat] = [int(v) for v in list_obj]
             else:
                 single_data[group_concat] = list_obj
             data.append({type_name : single_data})
-        if row != None and type_name != None:
+        elif row != None and type_name != None:
             data.append({type_name : dict(zip(cols, row))})
-        if row != None and type_name == None:
+        elif row != None and type_name == None:
             data.append(dict(zip(cols, row)))
     
     return jsonify(data)
+
+def json_format_single(result, cols, type_name=None, group_concat=None):
+    for row in result:
+        if row != None and type_name != None and group_concat != None:
+            # change field from list of strings to array of ids
+            # each instance of cols in queries.py is defined as having the list od strs as the last element
+            single_data = dict(zip(cols, row))
+            list_obj = single_data[group_concat].split(',')
+            if(group_concat == 'user_ids'):
+                single_data[group_concat] = [int(v) for v in list_obj]
+            else:
+                single_data[group_concat] = list_obj
+            return jsonify({type_name : single_data})
+        elif row != None and type_name != None:
+            return jsonify({type_name : dict(zip(cols, row))})
+        elif row != None and type_name == None:
+            return jsonify(dict(zip(cols, row)))
 
 @app.route('/')
 def hello_world():
@@ -53,7 +70,7 @@ def users():
 @app.route('/users/<user_id>')
 def user_info(user_id):
     #ensure user_id exists
-    c.exectue(SELECT_USER_BY_ID_CHECK, [user_id])
+    c.execute(SELECT_USER_BY_ID_CHECK, [user_id])
     result = c.fetchone()
     if result == None:
         return Response('ERROR: no user with id {0}'.format(user_id), status=403)
@@ -62,7 +79,7 @@ def user_info(user_id):
     c.execute(SELECT_SINGLE_USER_INFO, [user_id])
     result = c.fetchone()
 
-    return json_format([result], SELECT_SINGLE_USER_INFO_COLS, 'user', 'attended_events')
+    return json_format_single([result], SELECT_SINGLE_USER_INFO_COLS, 'user', 'attended_events')
 
 @app.route('/location', methods=['GET'])
 def location_info():
@@ -127,7 +144,7 @@ def event_attendeed(event_id):
         user_id = request.args.get('user_id')
 
         #ensure user id exists
-        c.exectue(SELECT_USER_BY_ID_CHECK, [user_id])
+        c.execute(SELECT_USER_BY_ID_CHECK, [user_id])
         result = c.fetchone()
         if result == None:
             return Response('ERROR: no user with id {0}'.format(user_id), status=403)
