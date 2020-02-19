@@ -94,9 +94,13 @@ SELECT_ATTENDANCE_BY_USER = '''
 '''
 
 SELECT_ATTENDANCE_BY_EVENT = '''
-    SELECT event_id FROM event_attendance
-     WHERE event_id = ?;
+    SELECT event_attendance.user_id, user.name FROM event_attendance
+      JOIN user
+        ON user.id = event_attendance.user_id
+     WHERE event_attendance.event_id = ?;
 '''
+
+SELECT_ATTENDANCE_BY_EVENT_COLS = ['user_id', 'name']
 
 # Takes in a latiutde, longitude, and range
 # order: lat min, lat max, long min, long max
