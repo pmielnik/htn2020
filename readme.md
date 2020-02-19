@@ -1,5 +1,18 @@
 # Hack the North 2020 Backend Challenge
 
+## Table of Contents
+ * [Hack the North 2020 Backend Challenge](#hack-the-north-2020-backend-challenge)
+      * [Setup](#setup)
+      * [GET method endpoints](#get-method-endpoints)
+         * [GET all users](#get-all-users)
+         * [GET user by id](#get-user-by-id)
+         * [GET user by location range](#get-user-by-location-range)
+         * [GET all events](#get-all-events)
+         * [GET event by id](#get-event-by-id)
+         * [GET event attendees by id](#get-event-attendees-by-id)
+      * [POST method endpoints](#post-method-endpoints)
+         * [POST event attendee by id](#post-event-attendee-by-id)
+
 ## Setup
 In order to run this server, navigate to the directory containing the main file and run
 `export FLASK_APP=main`, then run `flask run`. You can now make calls to the server!
@@ -140,7 +153,7 @@ Returns an event object with the given id.
 ]
 ```
 
-##POST method endpoints
+## POST method endpoints
 
 ### POST event attendee by id
 *Link:* `http://127.0.0.1:5000/events/<event_id>/attendees`
