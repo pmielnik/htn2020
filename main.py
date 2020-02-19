@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 import sqlite3
 from database.queries import *
 
@@ -52,6 +52,12 @@ def users():
 
 @app.route('/users/<user_id>')
 def user_info(user_id):
+    #ensure user_id exists
+    c.exectue(SELECT_USER_BY_ID_CHECK, [user_id])
+    result = c.fetchone()
+    if result == None:
+        return Response('ERROR: no user with id {0}'.format(user_id), status=403)
+
     #reutrn json payload of single user
     c.execute(SELECT_SINGLE_USER_INFO, [user_id])
     result = c.fetchone()
@@ -84,7 +90,6 @@ def events():
 
 @app.route('/events/<event_id>')
 def event_info(event_id):
-    print(event_id)
     #return json obj with event info + attendees
     c.execute(SELECT_EVENT_INFO_BY_ID, [event_id])
     result = c.fetchone()
@@ -102,34 +107,33 @@ def event_info(event_id):
         del data['user_ids']
         return jsonify(data)
     
-    return 'ERROR: event {0} does not exist'.format(event_id)
+    return Response('ERROR: event {0} does not exist'.format(event_id), status=403)
 
 @app.route('/events/<event_id>/attendees', methods=['GET', 'POST'])
 def event_attendeed(event_id):
+    #ensure event_id exists
+    c.execute(SELECT_EVENT_BY_ID_CHECK, [event_id])
+    result = c.fetchone()
+    if result == None:
+        return Response('ERROR: no event with id {0}'.format(event_id), status=403)
     if request.method == 'GET':
         #simply return list of attendees
         c.execute(SELECT_ATTENDANCE_BY_EVENT, [event_id])
         result = c.fetchone()
 
         return json_format([result], SELECT_ATTENDANCE_BY_EVENT_COLS, 'attendee')
-    if request.method == 'POST':
+    elif request.method == 'POST':
         #register an attendee at the event, then return list of attendees
         user_id = request.args.get('user_id')
 
-        #ensure both user id and event id exist
+        #ensure user id exists
         c.exectue(SELECT_USER_BY_ID_CHECK, [user_id])
         result = c.fetchone()
         if result == None:
-            #TODO: throw error
-            return 'ERROR: no user with id {0}'.format(user_id)
-        c.execute(SELECT_EVENT_BY_ID_CHECK, [event_id])
-        result = c.fetchone()
-        if result == None:
-            #TODO: throw error
-            return 'ERROR: no event with id {0}'.format(event_id)
+            return Response('ERROR: no user with id {0}'.format(user_id), status=403)
 
         c.execute(MARK_ATTENDANCE_SQL, [event_id, user_id])
         conn.commit()
         
         #if not crashed:
-        return 'success: registered user {0} for event {1}'.format(user_id, event_id)
+        return Response('SUCCESS: registered user {0} for event {1}'.format(user_id, event_id), status=200)

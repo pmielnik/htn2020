@@ -104,9 +104,10 @@ SELECT_ATTENDANCE_BY_USER = '''
 '''
 
 SELECT_ATTENDANCE_BY_EVENT = '''
-    SELECT event_attendance.user_id, user.name FROM event_attendance
-      JOIN user
-        ON user.id = event_attendance.user_id
+    SELECT event_attendance.user_id, users.name
+      FROM event_attendance
+      JOIN users
+        ON users.id = event_attendance.user_id
      WHERE event_attendance.event_id = ?;
 '''
 

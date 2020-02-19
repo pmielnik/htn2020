@@ -1,7 +1,7 @@
 import sqlite3
-import requests
 import json
 from queries import *
+
 conn = sqlite3.connect('htn2020.db')
 c = conn.cursor()
 
