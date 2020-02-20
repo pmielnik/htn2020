@@ -136,9 +136,9 @@ def event_attendeed(event_id):
     if request.method == 'GET':
         #simply return list of attendees
         c.execute(SELECT_ATTENDANCE_BY_EVENT, [event_id])
-        result = c.fetchone()
+        result = c.fetchall()
 
-        return json_format([result], SELECT_ATTENDANCE_BY_EVENT_COLS, 'attendee')
+        return json_format(result, SELECT_ATTENDANCE_BY_EVENT_COLS, 'attendee')
     elif request.method == 'POST':
         #register an attendee at the event, then return list of attendees
         user_id = request.args.get('user_id')
