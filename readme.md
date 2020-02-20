@@ -12,6 +12,7 @@
          * [GET event attendees by id](#get-event-attendees-by-id)
       * [POST method endpoints](#post-method-endpoints)
          * [POST event attendee by id](#post-event-attendee-by-id)
+     * [Next Steps](#next-steps)
 
 ## Setup
 In order to run this server, navigate to the directory containing the main file and run
@@ -169,3 +170,11 @@ Regeisters a user as an event attendee.
     "user_id":int
 }
 ```
+
+## Next Steps
+* add POST endpoints to allow API cals to create and update database information
+* create more specific GET endpoints for events, users, companies, and locations to find things by id or by name
+* host this server online instead of locally
+* add more information to events table in db, for example time, location, and facilitators
+* add more information to locations table in db, for example a more general location of city/country
+* add more information to companies in db
