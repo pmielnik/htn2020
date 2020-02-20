@@ -8,9 +8,7 @@ c = conn.cursor()
 
 app = Flask(__name__)
 
-#TODO: add to docs that you need to run "export FLASK_APP=main" and then run "flask run" to run the app
-
-#TODO: fix db lol
+#################################### Helper Functions ####################################
 
 # formats the result, which is a list fo sqlite3.Row objects, into a
 # JSON object with the specified cols as keys
@@ -51,13 +49,24 @@ def json_format_single(result, cols, type_name=None, group_concat=None):
         elif row != None and type_name == None:
             return jsonify(dict(zip(cols, row)))
 
+#################################### API Definitions ####################################
 @app.route('/')
 def hello_world():
-    return 'Hello, World!'
+    return 'Hack the North 2020 Backend Dev Challenge Server'
 
 @app.route('/help')
 def docs():
-    return 'this is where docs will go lol'
+    return ('''
+        The following endpoints are currently supported by this API:\n
+        - /users: GET\n
+        - /users/<user_id>: GET\n
+        - /location: GET\n
+        - /events: GET\n
+        - /events/<event_id>: GET\n
+        - /events/<event_id>/attendees: GET/POST\n
+        \n
+        For more information, please see https://github.com/pmielnik/htn2020
+    ''')
 
 @app.route('/users')
 def users():

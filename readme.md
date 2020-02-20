@@ -17,6 +17,9 @@
 In order to run this server, navigate to the directory containing the main file and run
 `export FLASK_APP=main`, then run `flask run`. You can now make calls to the server!
 
+At any point in time, you can go to `http://127.0.0.1:5000/help` for a quick overview of
+available endpoints.
+
 ## GET method endpoints
 
 ### GET all users
