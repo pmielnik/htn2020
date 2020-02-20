@@ -53,7 +53,7 @@ Returns a list of all users in the htn2020 database.
 ### GET user by id
 *Link:* `http://127.0.0.1:5000/users/<user_id>`
 
-Returns the information for a single user given their ID.
+Returns the information for a single user given their ID (integer).
 
 **Response Format:**
 ```json
@@ -116,7 +116,7 @@ Returns a list of all event objects.
 ### GET event by id
 *Link:* `http://127.0.0.1:5000/events/<event_id>`
 
-Returns an event object with the given id.
+Returns an event object with the given ID (integer).
 
 **Response Format:**
 ```json
@@ -142,7 +142,7 @@ Returns an event object with the given id.
 ### GET event attendees by id
 *Link:* `http://127.0.0.1:5000/events/<event_id>/attendees`
 
-Returns an event object with the given id.
+Returns a list of attendees for the event with the given ID (integer).
 
 **Response Format:**
 ```json
@@ -162,7 +162,7 @@ Returns an event object with the given id.
 ### POST event attendee by id
 *Link:* `http://127.0.0.1:5000/events/<event_id>/attendees`
 
-Regeisters a user as an event attendee.
+Regeisters a user as an event attendee of the event with the given ID (integer).
 
 **Request Format:**
 ```json
